@@ -1,0 +1,17 @@
+{
+    "short_name": "Rent vs Buy",
+    "name": "Rent vs Buy Simulator - FEGI Apps",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0f172a",
+    "theme_color": "#0f172a",
+    "description": "Real Estate Financial Intelligence Simulator",
+    "icons": [
+      {
+        "src": "/favicon.svg",
+        "sizes": "512x512",
+        "type": "image/svg+xml",
+        "purpose": "any maskable"
+      }
+    ]
+  }
