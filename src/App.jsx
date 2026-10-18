@@ -2,7 +2,9 @@ import React, { useState, useMemo } from 'react';
 
 export default function App() {
   // Idioma y Moneda
-  const [lang, setLang] = useState('es');
+  const [lang, setLang] = useState(() => 
+  navigator.language && navigator.language.toLowerCase().startsWith('es') ? 'es' : 'en'
+);
   const [currency, setCurrency] = useState('USD');
   const [showTipModal, setShowTipModal] = useState(false);
 
