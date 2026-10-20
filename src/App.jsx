@@ -387,4 +387,205 @@ export default function App() {
               setValue={setInterestRate}
               min={1}
               max={18}
-              step={
+              step={0.1}
+              display={`${interestRate}%`}
+            />
+            <SliderControl
+              label={t.loanTerm}
+              value={loanTermYears}
+              setValue={setLoanTermYears}
+              min={5}
+              max={30}
+              step={5}
+              display={`${loanTermYears} years`}
+            />
+            <SliderControl
+              label={t.appreciation}
+              value={appreciationRate}
+              setValue={setAppreciationRate}
+              min={0}
+              max={15}
+              step={0.5}
+              display={`${appreciationRate}%`}
+            />
+            <SliderControl
+              label={t.maintenance}
+              value={maintenancePct}
+              setValue={setMaintenancePct}
+              min={0}
+              max={5}
+              step={0.1}
+              display={`${maintenancePct}%`}
+            />
+            <SliderControl
+              label={t.closingCosts}
+              value={closingCostsPct}
+              setValue={setClosingCostsPct}
+              min={0}
+              max={10}
+              step={0.5}
+              display={`${closingCostsPct}%`}
+            />
+          </div>
+
+          {/* Columna Alquiler e Inversión */}
+          <div
+            style={{
+              background: '#1e293b',
+              padding: '18px',
+              borderRadius: '14px',
+              border: '1px solid #334155',
+            }}
+          >
+            <h2
+              style={{
+                fontSize: '16px',
+                fontWeight: '700',
+                marginTop: 0,
+                marginBottom: '16px',
+                color: '#10b981',
+              }}
+            >
+              📈 {t.rentSection}
+            </h2>
+
+            <SliderControl
+              label={t.monthlyRent}
+              value={monthlyRent}
+              setValue={setMonthlyRent}
+              min={300}
+              max={15000}
+              step={100}
+              display={fmt(monthlyRent)}
+            />
+            <SliderControl
+              label={t.rentIncrease}
+              value={rentInflation}
+              setValue={setRentInflation}
+              min={0}
+              max={10}
+              step={0.5}
+              display={`${rentInflation}%`}
+            />
+            <SliderControl
+              label={t.invReturn}
+              value={investmentReturn}
+              setValue={setInvestmentReturn}
+              min={1}
+              max={20}
+              step={0.5}
+              display={`${investmentReturn}%`}
+            />
+            <SliderControl
+              label={t.horizon}
+              value={horizonYears}
+              setValue={setHorizonYears}
+              min={1}
+              max={30}
+              step={1}
+              display={`${horizonYears} years`}
+            />
+          </div>
+        </div>
+
+        {/* Botón de Apoyo / Donación */}
+        <div style={{ textAlign: 'center', marginTop: '30px' }}>
+          <button
+            onClick={() => setShowTipModal(true)}
+            style={{
+              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '30px',
+              padding: '12px 24px',
+              fontSize: '14px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
+            }}
+          >
+            {t.supportBtn}
+          </button>
+        </div>
+
+        {/* Modal de Apoyo */}
+        {showTipModal && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+              zIndex: 1000,
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: '#1e293b',
+                borderRadius: '16px',
+                padding: '24px',
+                maxWidth: '400px',
+                width: '100%',
+                border: '1px solid #334155',
+                textAlign: 'center',
+              }}
+            >
+              <h3 style={{ fontSize: '18px', fontWeight: '800', margin: '0 0 10px 0', color: '#f59e0b' }}>
+                {t.supportTitle}
+              </h3>
+              <p style={{ fontSize: '13px', color: '#94a3b8', lineHeight: '1.5', margin: '0 0 20px 0' }}>
+                {t.supportDesc}
+              </p>
+              <button
+                onClick={() => setShowTipModal(false)}
+                style={{
+                  backgroundColor: '#334155',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '10px 20px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  width: '100%',
+                }}
+              >
+                {t.close}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Componente Auxiliar para Sliders Limpios
+function SliderControl({ label, value, setValue, min, max, step, display }) {
+  return (
+    <div style={{ marginBottom: '14px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
+        <span style={{ color: '#cbd5e1' }}>{label}</span>
+        <span style={{ fontWeight: '700', color: '#38bdf8' }}>{display}</span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => setValue(parseFloat(e.target.value))}
+        style={{
+          width: '100%',
+          accentColor: '#38bdf8',
+          cursor: 'pointer',
+        }}
+      />
+    </div>
+  );
+}
