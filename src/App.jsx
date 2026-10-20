@@ -3,8 +3,8 @@ import React, { useState, useMemo } from 'react';
 export default function App() {
   // Idioma y Moneda
   const [lang, setLang] = useState(() => 
-  navigator.language && navigator.language.toLowerCase().startsWith('es') ? 'es' : 'en'
-);
+    navigator.language && navigator.language.toLowerCase().startsWith('es') ? 'es' : 'en'
+  );
   const [currency, setCurrency] = useState('USD');
   const [showTipModal, setShowTipModal] = useState(false);
 
@@ -17,7 +17,7 @@ export default function App() {
   const [maintenancePct, setMaintenancePct] = useState(1.0);
   const [closingCostsPct, setClosingCostsPct] = useState(3.5);
 
-  // Parámetros de Alquiler e Inversión
+  // Parámetros de Alquiler e Inversión (Límite superior ampliado)
   const [monthlyRent, setMonthlyRent] = useState(1100);
   const [rentInflation, setRentInflation] = useState(4.0);
   const [investmentReturn, setInvestmentReturn] = useState(8.0);
@@ -25,8 +25,8 @@ export default function App() {
 
   const t = {
     es: {
-      title: 'Rent vs. Buy Simulator',
-      subtitle: 'Inteligencia Financiera Inmobiliaria • FEGI Apps',
+      title: 'Rent vs Buy Real Estate',
+      subtitle: 'Simulador Financiero Inmobiliario Avanzado • FEGI Apps',
       buySection: 'Escenario de Compra',
       rentSection: 'Escenario de Alquiler e Inversión',
       homePrice: 'Precio de la Propiedad',
@@ -42,7 +42,7 @@ export default function App() {
       horizon: 'Horizonte de Comparación (Años)',
       verdictBuy: 'COMPRAR ES MEJOR OPCIÓN',
       verdictRent: 'ALQUILAR E INVERTIR ES MEJOR',
-      netWorthDiff: 'Ventaja de Patrimonio Neto a',
+      netWorthDiff: 'Ventaja de Patrimonio Neto (Net Worth) a',
       years: 'años',
       monthlyMortgage: 'Cuota Hipotecaria Mensual (P&I)',
       initialCash: 'Efectivo Inicial Requerido',
@@ -55,8 +55,8 @@ export default function App() {
       close: 'Cerrar',
     },
     en: {
-      title: 'Rent vs. Buy Simulator',
-      subtitle: 'Real Estate Financial Intelligence • FEGI Apps',
+      title: 'Rent vs Buy Real Estate',
+      subtitle: 'Advanced Real Estate Financial Simulator • FEGI Apps',
       buySection: 'Buying Scenario',
       rentSection: 'Renting & Investing Scenario',
       homePrice: 'Property Price',
@@ -107,7 +107,6 @@ export default function App() {
     let remainingBalance = loanAmount;
     let currentRent = monthlyRent;
 
-    // El inquilino invierte el inicial + gastos de cierre desde el día 1
     let renterPortfolio = initialCashOutlay;
     let buyerPortfolio = 0;
 
@@ -117,7 +116,6 @@ export default function App() {
     const totalMonths = horizonYears * 12;
 
     for (let m = 1; m <= totalMonths; m++) {
-      // Actualizar valor de la casa y deuda
       currentHomeValue *= 1 + monthlyAppreciation;
       const interestPayment = remainingBalance * monthlyRate;
       const principalPayment =
@@ -129,11 +127,9 @@ export default function App() {
       const totalBuyerMonthlyCost =
         (m <= totalPayments ? monthlyMortgage : 0) + monthlyMaintenance;
 
-      // Crecimiento de portafolios de inversión
       renterPortfolio *= 1 + monthlyInvReturn;
       buyerPortfolio *= 1 + monthlyInvReturn;
 
-      // Quien gaste menos cada mes invierte la diferencia
       const monthlyDiff = totalBuyerMonthlyCost - currentRent;
       if (monthlyDiff > 0) {
         renterPortfolio += monthlyDiff;
@@ -141,13 +137,11 @@ export default function App() {
         buyerPortfolio += Math.abs(monthlyDiff);
       }
 
-      // Inflación anual del alquiler cada 12 meses
       if (m % 12 === 0) {
         currentRent *= 1 + rentInflation / 100;
       }
     }
 
-    // Comisión de venta estimada al final del horizonte (5%)
     const sellingCosts = currentHomeValue * 0.05;
     const buyerNetWorth =
       currentHomeValue - remainingBalance - sellingCosts + buyerPortfolio;
@@ -193,7 +187,7 @@ export default function App() {
       }}
     >
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-        {/* Header con el estilo del nuevo logo F */}
+        {/* Header con el nuevo isotipo RB */}
         <header
           style={{
             display: 'flex',
@@ -210,16 +204,17 @@ export default function App() {
                 width: '42px',
                 height: '42px',
                 borderRadius: '10px',
-                background: 'linear-gradient(135deg, #00c6ff 0%, #6366f1 100%)',
+                background: 'linear-gradient(135deg, #38bdf8 0%, #6366f1 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontWeight: '900',
-                fontSize: '24px',
+                fontSize: '20px',
                 color: '#fff',
+                boxShadow: '0 4px 12px rgba(56, 189, 248, 0.3)',
               }}
             >
-              F
+              RB
             </div>
             <div>
               <h1 style={{ fontSize: '20px', fontWeight: '800', margin: 0 }}>
@@ -392,256 +387,4 @@ export default function App() {
               setValue={setInterestRate}
               min={1}
               max={18}
-              step={0.1}
-              display={`${interestRate}%`}
-            />
-            <SliderControl
-              label={t.loanTerm}
-              value={loanTermYears}
-              setValue={setLoanTermYears}
-              min={5}
-              max={35}
-              step={1}
-              display={`${loanTermYears} ${t.years}`}
-            />
-            <SliderControl
-              label={t.appreciation}
-              value={appreciationRate}
-              setValue={setAppreciationRate}
-              min={0}
-              max={12}
-              step={0.5}
-              display={`${appreciationRate}%`}
-            />
-            <SliderControl
-              label={t.maintenance}
-              value={maintenancePct}
-              setValue={setMaintenancePct}
-              min={0}
-              max={4}
-              step={0.1}
-              display={`${maintenancePct}%`}
-            />
-          </div>
-
-          {/* Columna Alquiler */}
-          <div
-            style={{
-              background: '#1e293b',
-              padding: '18px',
-              borderRadius: '14px',
-              border: '1px solid #334155',
-            }}
-          >
-            <h2
-              style={{
-                fontSize: '16px',
-                fontWeight: '700',
-                marginTop: 0,
-                marginBottom: '16px',
-                color: '#34d399',
-              }}
-            >
-              📈 {t.rentSection}
-            </h2>
-
-            <SliderControl
-              label={t.monthlyRent}
-              value={monthlyRent}
-              setValue={setMonthlyRent}
-              min={200}
-              max={15000}
-              step={50}
-              display={fmt(monthlyRent)}
-            />
-            <SliderControl
-              label={t.rentIncrease}
-              value={rentInflation}
-              setValue={setRentInflation}
-              min={0}
-              max={12}
-              step={0.5}
-              display={`${rentInflation}%`}
-            />
-            <SliderControl
-              label={t.invReturn}
-              value={investmentReturn}
-              setValue={setInvestmentReturn}
-              min={0}
-              max={18}
-              step={0.5}
-              display={`${investmentReturn}%`}
-            />
-            <SliderControl
-              label={t.horizon}
-              value={horizonYears}
-              setValue={setHorizonYears}
-              min={1}
-              max={30}
-              step={1}
-              display={`${horizonYears} ${t.years}`}
-            />
-            <SliderControl
-              label={t.closingCosts}
-              value={closingCostsPct}
-              setValue={setClosingCostsPct}
-              min={0}
-              max={8}
-              step={0.5}
-              display={`${closingCostsPct}%`}
-            />
-          </div>
-        </div>
-
-        {/* Botón de Aporte Voluntario */}
-        <div
-          style={{
-            textAlign: 'center',
-            marginTop: '28px',
-            marginBottom: '40px',
-          }}
-        >
-          <button
-            onClick={() => setShowTipModal(true)}
-            style={{
-              background: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)',
-              color: '#fff',
-              border: 'none',
-              padding: '12px 24px',
-              borderRadius: '999px',
-              fontWeight: '700',
-              fontSize: '14px',
-              cursor: 'pointer',
-              boxShadow: '0 4px 14px rgba(234, 88, 12, 0.4)',
-            }}
-          >
-            {t.supportBtn}
-          </button>
-        </div>
-
-        {/* Modal de Donaciones */}
-        {showTipModal && (
-          <div
-            style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'rgba(0,0,0,0.75)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '16px',
-              zIndex: 50,
-            }}
-          >
-            <div
-              style={{
-                background: '#1e293b',
-                border: '1px solid #334155',
-                borderRadius: '16px',
-                maxWidth: '400px',
-                width: '100%',
-                padding: '24px',
-                textAlign: 'center',
-              }}
-            >
-              <h3 style={{ marginTop: 0, fontSize: '20px' }}>
-                {t.supportTitle}
-              </h3>
-              <p
-                style={{
-                  fontSize: '14px',
-                  color: '#cbd5e1',
-                  lineHeight: '1.5',
-                }}
-              >
-                {t.supportDesc}
-              </p>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '10px',
-                  margin: '20px 0',
-                }}
-              >
-                <button
-                  onClick={() =>
-                    alert(
-                      'Conectar ID de producto en Google Play: tip_coffee_2'
-                    )
-                  }
-                  style={{
-                    background: '#334155',
-                    color: '#fff',
-                    border: '1px solid #475569',
-                    padding: '12px',
-                    borderRadius: '10px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                  }}
-                >
-                  ☕ Café ($1.99 USD)
-                </button>
-                <button
-                  onClick={() =>
-                    alert('Conectar ID de producto en Google Play: tip_lunch_5')
-                  }
-                  style={{
-                    background: '#3b82f6',
-                    color: '#fff',
-                    border: 'none',
-                    padding: '12px',
-                    borderRadius: '10px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                  }}
-                >
-                  🚀 Impulso Pro ($4.99 USD)
-                </button>
-              </div>
-              <button
-                onClick={() => setShowTipModal(false)}
-                style={{
-                  background: 'transparent',
-                  color: '#94a3b8',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '13px',
-                }}
-              >
-                {t.close}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function SliderControl({ label, value, setValue, min, max, step, display }) {
-  return (
-    <div style={{ marginBottom: '14px' }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          fontSize: '13px',
-          marginBottom: '4px',
-        }}
-      >
-        <span style={{ color: '#cbd5e1' }}>{label}</span>
-        <span style={{ fontWeight: '700', color: '#f8fafc' }}>{display}</span>
-      </div>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(e) => setValue(parseFloat(e.target.value))}
-        style={{ width: '100%', accentColor: '#38bdf8', cursor: 'pointer' }}
-      />
-    </div>
-  );
-}
+              step={
