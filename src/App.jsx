@@ -7,6 +7,14 @@ export default function App() {
   );
   const [currency, setCurrency] = useState('USD');
   const [showTipModal, setShowTipModal] = useState(false);
+  const [selectedTipOption, setSelectedTipOption] = useState(1); // 0: Té ($1.99), 1: Café ($3.99), 2: Dime tú ($5.99)
+  const [tipProcessed, setTipProcessed] = useState(false);
+
+  const tipOptions = [
+    { labelEs: '🍵 Taza de Té', labelEn: '🍵 Cup of Tea', amount: 1.99 },
+    { labelEs: '☕ Taza de Café', labelEn: '☕ Cup of Coffee', amount: 3.99 },
+    { labelEs: '✨ Dime tú', labelEn: '✨ You name it', amount: 5.99 },
+  ];
 
   // Parámetros de Compra (Rangos ampliados para EE.UU. y Rep. Dom.)
   const [homePrice, setHomePrice] = useState(350000);
@@ -49,10 +57,11 @@ export default function App() {
       buyNetWorth: 'Patrimonio al Comprar',
       rentNetWorth: 'Patrimonio al Alquilar + Invertir',
       netWorthTooltip: 'Patrimonio Neto: Valor total de activos menos deudas al final del horizonte.',
-      supportBtn: '☕ Apoyar este proyecto',
-      supportTitle: 'Apoya a FEGI Apps',
-      supportDesc:
-        'Este simulador es gratuito y sin anuncios invasivos. Si te ayudó a tomar una mejor decisión financiera, puedes invitarnos un café.',
+      supportBtn: '🍵 Apoyar este proyecto',
+      supportTitle: 'Apoya el desarrollo de FEGI Apps',
+      supportDesc: 'Si este simulador te ha ayudado, elige una opción para apoyarnos:',
+      contribute: 'Aportar',
+      thankYou: '¡Muchísimas gracias por tu apoyo! Tu contribución impulsa nuevas herramientas financieras.',
       close: 'Cerrar',
     },
     en: {
@@ -80,10 +89,11 @@ export default function App() {
       buyNetWorth: 'Net Worth (Buying)',
       rentNetWorth: 'Net Worth (Rent + Invest)',
       netWorthTooltip: 'Net Worth: Total assets minus liabilities at the end of the horizon.',
-      supportBtn: '☕ Support this project',
-      supportTitle: 'Support FEGI Apps',
-      supportDesc:
-        'This simulator is free and ad-free. If it helped you make a smarter financial decision, consider buying us a coffee.',
+      supportBtn: '🍵 Support this project',
+      supportTitle: 'Support FEGI Apps development',
+      supportDesc: 'If this simulator helped you, choose an option to support us:',
+      contribute: 'Contribute',
+      thankYou: 'Thank you so much for your support! Your contribution powers new financial tools.',
       close: 'Close',
     },
   }[lang];
@@ -343,7 +353,7 @@ export default function App() {
             gap: '20px',
           }}
         >
-          {/* Columna Compra (Rango de propiedad hasta $5M) */}
+          {/* Columna Compra */}
           <div
             style={{
               background: '#1e293b',
@@ -431,7 +441,7 @@ export default function App() {
             />
           </div>
 
-          {/* Columna Alquiler e Inversión (Rango de renta hasta $50,000) */}
+          {/* Columna Alquiler e Inversión */}
           <div
             style={{
               background: '#1e293b',
@@ -491,10 +501,13 @@ export default function App() {
           </div>
         </div>
 
-        {/* Botón de Apoyo / Donación */}
+        {/* Botón de Apoyo */}
         <div style={{ textAlign: 'center', marginTop: '30px' }}>
           <button
-            onClick={() => setShowTipModal(true)}
+            onClick={() => {
+              setTipProcessed(false);
+              setShowTipModal(true);
+            }}
             style={{
               background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
               color: '#fff',
@@ -511,7 +524,7 @@ export default function App() {
           </button>
         </div>
 
-        {/* Modal de Apoyo */}
+        {/* Modal de Aporte (Té, Café y Dime tú) */}
         {showTipModal && (
           <div
             style={{
@@ -533,7 +546,7 @@ export default function App() {
                 backgroundColor: '#1e293b',
                 borderRadius: '16px',
                 padding: '24px',
-                maxWidth: '400px',
+                maxWidth: '420px',
                 width: '100%',
                 border: '1px solid #334155',
                 textAlign: 'center',
@@ -542,9 +555,62 @@ export default function App() {
               <h3 style={{ fontSize: '18px', fontWeight: '800', margin: '0 0 10px 0', color: '#f59e0b' }}>
                 {t.supportTitle}
               </h3>
-              <p style={{ fontSize: '13px', color: '#94a3b8', lineHeight: '1.5', margin: '0 0 20px 0' }}>
-                {t.supportDesc}
-              </p>
+
+              {!tipProcessed ? (
+                <>
+                  <p style={{ fontSize: '13px', color: '#94a3b8', lineHeight: '1.5', margin: '0 0 16px 0' }}>
+                    {t.supportDesc}
+                  </p>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
+                    {tipOptions.map((opt, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedTipOption(idx)}
+                        style={{
+                          background: selectedTipOption === idx ? '#f59e0b' : '#334155',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '8px',
+                          padding: '10px 14px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <span>{lang === 'es' ? opt.labelEs : opt.labelEn}</span>
+                        <span style={{ background: 'rgba(0,0,0,0.2)', padding: '2px 8px', borderRadius: '6px' }}>
+                          ${opt.amount}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => setTipProcessed(true)}
+                    style={{
+                      background: '#10b981',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '10px 20px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      width: '100%',
+                      marginBottom: '10px',
+                    }}
+                  >
+                    {t.contribute} (${tipOptions[selectedTipOption].amount})
+                  </button>
+                </>
+              ) : (
+                <p style={{ fontSize: '14px', color: '#34d399', lineHeight: '1.5', margin: '20px 0' }}>
+                  {t.thankYou}
+                </p>
+              )}
+
               <button
                 onClick={() => setShowTipModal(false)}
                 style={{
@@ -552,7 +618,7 @@ export default function App() {
                   color: '#fff',
                   border: 'none',
                   borderRadius: '8px',
-                  padding: '10px 20px',
+                  padding: '8px 16px',
                   fontWeight: '600',
                   cursor: 'pointer',
                   width: '100%',
