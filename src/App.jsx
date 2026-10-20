@@ -8,17 +8,17 @@ export default function App() {
   const [currency, setCurrency] = useState('USD');
   const [showTipModal, setShowTipModal] = useState(false);
 
-  // Parámetros de Compra
-  const [homePrice, setHomePrice] = useState(180000);
+  // Parámetros de Compra (Rangos ampliados para EE.UU. y Rep. Dom.)
+  const [homePrice, setHomePrice] = useState(350000);
   const [downPaymentPct, setDownPaymentPct] = useState(20);
-  const [interestRate, setInterestRate] = useState(8.5);
-  const [loanTermYears, setLoanTermYears] = useState(20);
+  const [interestRate, setInterestRate] = useState(7.5);
+  const [loanTermYears, setLoanTermYears] = useState(30);
   const [appreciationRate, setAppreciationRate] = useState(4.5);
   const [maintenancePct, setMaintenancePct] = useState(1.0);
   const [closingCostsPct, setClosingCostsPct] = useState(3.5);
 
-  // Parámetros de Alquiler e Inversión (Límite superior ampliado)
-  const [monthlyRent, setMonthlyRent] = useState(1100);
+  // Parámetros de Alquiler e Inversión (Límite superior ampliado hasta $50,000)
+  const [monthlyRent, setMonthlyRent] = useState(2500);
   const [rentInflation, setRentInflation] = useState(4.0);
   const [investmentReturn, setInvestmentReturn] = useState(8.0);
   const [horizonYears, setHorizonYears] = useState(10);
@@ -48,6 +48,7 @@ export default function App() {
       initialCash: 'Efectivo Inicial Requerido',
       buyNetWorth: 'Patrimonio al Comprar',
       rentNetWorth: 'Patrimonio al Alquilar + Invertir',
+      netWorthTooltip: 'Patrimonio Neto: Valor total de activos menos deudas al final del horizonte.',
       supportBtn: '☕ Apoyar este proyecto',
       supportTitle: 'Apoya a FEGI Apps',
       supportDesc:
@@ -78,6 +79,7 @@ export default function App() {
       initialCash: 'Initial Cash Required',
       buyNetWorth: 'Net Worth (Buying)',
       rentNetWorth: 'Net Worth (Rent + Invest)',
+      netWorthTooltip: 'Net Worth: Total assets minus liabilities at the end of the horizon.',
       supportBtn: '☕ Support this project',
       supportTitle: 'Support FEGI Apps',
       supportDesc:
@@ -283,8 +285,9 @@ export default function App() {
           <div style={{ fontSize: '28px', fontWeight: '900', margin: '6px 0' }}>
             +{fmt(results.difference)}
           </div>
-          <div style={{ fontSize: '13px', opacity: 0.9 }}>
-            {t.netWorthDiff} {horizonYears} {t.years}
+          <div style={{ fontSize: '13px', opacity: 0.9, display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span>{t.netWorthDiff} {horizonYears} {t.years}</span>
+            <span title={t.netWorthTooltip} style={{ cursor: 'help', background: 'rgba(255,255,255,0.2)', borderRadius: '50%', width: '16px', height: '16px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 'bold' }}>?</span>
           </div>
 
           <div
@@ -340,7 +343,7 @@ export default function App() {
             gap: '20px',
           }}
         >
-          {/* Columna Compra */}
+          {/* Columna Compra (Rango de propiedad hasta $5M) */}
           <div
             style={{
               background: '#1e293b',
@@ -365,9 +368,9 @@ export default function App() {
               label={t.homePrice}
               value={homePrice}
               setValue={setHomePrice}
-              min={30000}
-              max={2000000}
-              step={5000}
+              min={50000}
+              max={5000000}
+              step={10000}
               display={fmt(homePrice)}
             />
             <SliderControl
@@ -428,7 +431,7 @@ export default function App() {
             />
           </div>
 
-          {/* Columna Alquiler e Inversión */}
+          {/* Columna Alquiler e Inversión (Rango de renta hasta $50,000) */}
           <div
             style={{
               background: '#1e293b',
@@ -453,9 +456,9 @@ export default function App() {
               label={t.monthlyRent}
               value={monthlyRent}
               setValue={setMonthlyRent}
-              min={300}
-              max={15000}
-              step={100}
+              min={500}
+              max={50000}
+              step={250}
               display={fmt(monthlyRent)}
             />
             <SliderControl
