@@ -7,13 +7,14 @@ export default function App() {
   );
   const [currency, setCurrency] = useState('USD');
   const [showTipModal, setShowTipModal] = useState(false);
-  const [selectedTipOption, setSelectedTipOption] = useState(1); // 0: Té ($1.99), 1: Café ($3.99), 2: Dime tú ($5.99)
+  const [selectedTipOption, setSelectedTipOption] = useState(1); // 0: Té ($1.99), 1: Café ($3.99), 2: Personalizado
+  const [customAmount, setCustomAmount] = useState(5.99);
   const [tipProcessed, setTipProcessed] = useState(false);
 
   const tipOptions = [
     { labelEs: '🍵 Taza de Té', labelEn: '🍵 Cup of Tea', amount: 1.99 },
     { labelEs: '☕ Taza de Café', labelEn: '☕ Cup of Coffee', amount: 3.99 },
-    { labelEs: '✨ Dime tú', labelEn: '✨ You name it', amount: 5.99 },
+    { labelEs: '✨ Dime tú (Personalizado)', labelEn: '✨ You name it (Custom)', amount: customAmount },
   ];
 
   // Parámetros de Compra (Rangos ampliados para EE.UU. y Rep. Dom.)
@@ -59,8 +60,9 @@ export default function App() {
       netWorthTooltip: 'Patrimonio Neto: Valor total de activos menos deudas al final del horizonte.',
       supportBtn: '🍵 Apoyar este proyecto',
       supportTitle: 'Apoya el desarrollo de FEGI Apps',
-      supportDesc: 'Si este simulador te ha ayudado, elige una opción para apoyarnos:',
+      supportDesc: 'Si este simulador te ha ayudado, elige o ingresa un monto para apoyarnos:',
       contribute: 'Aportar',
+      enterCustom: 'Ingresa tu monto ($ USD):',
       thankYou: '¡Muchísimas gracias por tu apoyo! Tu contribución impulsa nuevas herramientas financieras.',
       close: 'Cerrar',
     },
@@ -91,8 +93,9 @@ export default function App() {
       netWorthTooltip: 'Net Worth: Total assets minus liabilities at the end of the horizon.',
       supportBtn: '🍵 Support this project',
       supportTitle: 'Support FEGI Apps development',
-      supportDesc: 'If this simulator helped you, choose an option to support us:',
+      supportDesc: 'If this simulator helped you, choose or enter an amount to support us:',
       contribute: 'Contribute',
+      enterCustom: 'Enter your amount ($ USD):',
       thankYou: 'Thank you so much for your support! Your contribution powers new financial tools.',
       close: 'Close',
     },
@@ -524,7 +527,7 @@ export default function App() {
           </button>
         </div>
 
-        {/* Modal de Aporte (Té, Café y Dime tú) */}
+        {/* Modal de Aporte con opción personalizada */}
         {showTipModal && (
           <div
             style={{
@@ -562,7 +565,7 @@ export default function App() {
                     {t.supportDesc}
                   </p>
                   
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
                     {tipOptions.map((opt, idx) => (
                       <button
                         key={idx}
@@ -582,11 +585,37 @@ export default function App() {
                       >
                         <span>{lang === 'es' ? opt.labelEs : opt.labelEn}</span>
                         <span style={{ background: 'rgba(0,0,0,0.2)', padding: '2px 8px', borderRadius: '6px' }}>
-                          ${opt.amount}
+                          {idx === 2 ? `$${customAmount}` : `$${opt.amount}`}
                         </span>
                       </button>
                     ))}
                   </div>
+
+                  {/* Input personalizado si selecciona la opción 3 (Dime tú) */}
+                  {selectedTipOption === 2 && (
+                    <div style={{ marginBottom: '16px', textAlign: 'left' }}>
+                      <label style={{ fontSize: '12px', color: '#cbd5e1', display: 'block', marginBottom: '4px' }}>
+                        {t.enterCustom}
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        step="0.5"
+                        value={customAmount}
+                        onChange={(e) => setCustomAmount(parseFloat(e.target.value) || 0)}
+                        style={{
+                          width: '100%',
+                          background: '#0f172a',
+                          color: '#fff',
+                          border: '1px solid #38bdf8',
+                          borderRadius: '8px',
+                          padding: '8px 12px',
+                          fontSize: '14px',
+                          fontWeight: '700',
+                        }}
+                      />
+                    </div>
+                  )}
 
                   <button
                     onClick={() => setTipProcessed(true)}
@@ -602,7 +631,7 @@ export default function App() {
                       marginBottom: '10px',
                     }}
                   >
-                    {t.contribute} (${tipOptions[selectedTipOption].amount})
+                    {t.contribute} (${selectedTipOption === 2 ? customAmount : tipOptions[selectedTipOption].amount})
                   </button>
                 </>
               ) : (
