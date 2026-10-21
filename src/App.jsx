@@ -7,11 +7,11 @@ export default function App() {
   
   const [currency, setCurrency] = useState('USD'); // 'USD', 'EUR', 'DOP'
   
-  // Tasas de cambio basadas en los valores reales actuales del mercado
+  // Tasas de cambio de referencia actuales
   const exchangeRates = {
     USD: 1,
-    EUR: 0.89,   // 1 USD = 0.89 EUR
-    DOP: 61.41   // 1 USD = 61.41 DOP
+    EUR: 0.89,
+    DOP: 61.41
   };
 
   const [propertyPrice, setPropertyPrice] = useState(5000000);
@@ -31,7 +31,7 @@ export default function App() {
   const [selectedTipOption, setSelectedTipOption] = useState(1);
   const [customAmount, setCustomAmount] = useState(5.99);
 
-  // Rangos máximos adaptados por divisa
+  // Rangos máximos dinámicos según la moneda activa
   const limits = useMemo(() => {
     if (currency === 'DOP') {
       return { maxPrice: 3000000000, maxRent: 1000000, stepPrice: 1000000, stepRent: 5000 };
@@ -70,15 +70,29 @@ export default function App() {
     }).format(val);
   };
 
+  // Cálculos simulados básicos para el panel de resultados
+  const downPaymentAmount = propertyPrice * (downPaymentPercent / 100);
+  const loanAmount = propertyPrice - downPaymentAmount;
+  const monthlyRateDecimal = (mortgageRate / 100) / 12;
+  const totalPayments = loanTerm * 12;
+  const monthlyMortgage = loanAmount > 0 && monthlyRateDecimal > 0 
+    ? (loanAmount * monthlyRateDecimal * Math.pow(1 + monthlyRateDecimal, totalPayments)) / (Math.pow(1 + monthlyRateDecimal, totalPayments) - 1)
+    : 0;
+
   return (
-    <div style={{ padding: '20px', fontFamily: 'sans-serif', backgroundColor: '#0f172a', color: '#fff', minHeight: '100vh' }}>
+    <div style={{ padding: '20px', fontFamily: 'sans-serif', backgroundColor: '#0f172a', color: '#fff', minHeight: '100vh', maxWidth: '600px', margin: '0 auto' }}>
+      
+      {/* Cabecera */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2>Rent vs Buy Real Estate</h2>
         <div>
+          <h2>Rent vs Buy Real Estate</h2>
+          <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>Advanced Real Estate Financial Simulator • FEGI Apps</p>
+        </div>
+        <div style={{ display: 'flex', gap: '8px' }}>
           <select 
             value={currency} 
             onChange={(e) => handleCurrencyChange(e.target.value)}
-            style={{ padding: '8px', borderRadius: '6px', background: '#1e293b', color: '#fff', border: '1px solid #475569', marginRight: '10px' }}
+            style={{ padding: '8px', borderRadius: '6px', background: '#1e293b', color: '#fff', border: '1px solid #475569' }}
           >
             <option value="USD">USD ($)</option>
             <option value="EUR">EUR (€)</option>
@@ -87,18 +101,37 @@ export default function App() {
 
           <button 
             onClick={() => setLang(lang === 'es' ? 'en' : 'es')}
-            style={{ padding: '8px 12px', borderRadius: '6px', background: '#3b82f6', color: '#fff', border: 'none', cursor: 'pointer' }}
+            style={{ padding: '8px 12px', borderRadius: '6px', background: '#3b82f6', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
           >
             {lang.toUpperCase()}
           </button>
         </div>
       </div>
 
+      {/* Tarjeta de Resultados Principal */}
+      <div style={{ background: '#10b981', padding: '20px', borderRadius: '12px', color: '#fff', marginBottom: '20px' }}>
+        <h4 style={{ margin: '0 0 10px 0', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '1px' }}>
+          {lang === 'es' ? 'Renting & Investing is Better' : 'Renting & Investing is Better'}
+        </h4>
+        <h2 style={{ fontSize: '28px', margin: '0 0 15px 0' }}>{fmt(propertyPrice * 0.35)}</h2>
+        <div style={{ fontSize: '14px', opacity: 0.9 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+            <span>{lang === 'es' ? 'Pago Mensual Hipoteca (P&I):' : 'Monthly Mortgage Payment (P&I):'}</span>
+            <strong>{fmt(monthlyMortgage)}/mes</strong>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span>{lang === 'es' ? 'Efectivo Inicial Requerido:' : 'Initial Cash Required:'}</span>
+            <strong>{fmt(downPaymentAmount + (propertyPrice * (closingCosts / 100)))}</strong>
+          </div>
+        </div>
+      </div>
+
+      {/* Panel de Compra */}
       <div style={{ background: '#1e293b', padding: '15px', borderRadius: '10px', marginBottom: '15px' }}>
-        <h3>{lang === 'es' ? 'Escenario de Compra' : 'Buying Scenario'}</h3>
+        <h3 style={{ fontSize: '16px', marginTop: 0 }}>🏠 {lang === 'es' ? 'Escenario de Compra' : 'Buying Scenario'}</h3>
         
-        <label>
-          {lang === 'es' ? 'Precio de la Propiedad' : 'Property Price'}: {fmt(propertyPrice)}
+        <label style={{ fontSize: '14px', display: 'block', marginBottom: '5px' }}>
+          {lang === 'es' ? 'Precio de la Propiedad' : 'Property Price'}: <strong>{fmt(propertyPrice)}</strong>
         </label>
         <input 
           type="range" 
@@ -110,8 +143,24 @@ export default function App() {
           style={{ width: '100%', marginBottom: '15px' }}
         />
 
-        <label>
-          {lang === 'es' ? 'Renta Mensual' : 'Monthly Rent'}: {fmt(monthlyRent)}
+        <label style={{ fontSize: '14px', display: 'block', marginBottom: '5px' }}>
+          {lang === 'es' ? 'Pago Inicial (%)' : 'Down Payment (%)'}: <strong>{downPaymentPercent}% ({fmt(downPaymentAmount)})</strong>
+        </label>
+        <input 
+          type="range" 
+          min={0} max={100} step={5}
+          value={downPaymentPercent} 
+          onChange={(e) => setDownPaymentPercent(Number(e.target.value))}
+          style={{ width: '100%', marginBottom: '15px' }}
+        />
+      </div>
+
+      {/* Panel de Renta e Inversión */}
+      <div style={{ background: '#1e293b', padding: '15px', borderRadius: '10px', marginBottom: '20px' }}>
+        <h3 style={{ fontSize: '16px', marginTop: 0 }}>📈 {lang === 'es' ? 'Escenario de Alquiler e Inversión' : 'Renting & Investing Scenario'}</h3>
+        
+        <label style={{ fontSize: '14px', display: 'block', marginBottom: '5px' }}>
+          {lang === 'es' ? 'Renta Mensual Actual' : 'Current Monthly Rent'}: <strong>{fmt(monthlyRent)}</strong>
         </label>
         <input 
           type="range" 
@@ -124,17 +173,19 @@ export default function App() {
         />
       </div>
 
+      {/* Botón de Apoyo / Soporte */}
       <button 
         onClick={() => setShowTipModal(true)}
-        style={{ width: '100%', padding: '12px', backgroundColor: '#f59e0b', color: '#000', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
+        style={{ width: '100%', padding: '14px', backgroundColor: '#f59e0b', color: '#000', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '15px' }}
       >
         ☕ {lang === 'es' ? 'Apoyar este proyecto' : 'Support this project'}
       </button>
 
+      {/* Modal de Donación */}
       {showTipModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
           <div style={{ background: '#1e293b', padding: '20px', borderRadius: '12px', width: '90%', maxWidth: '400px', border: '1px solid #475569' }}>
-            <h3>{lang === 'es' ? 'Apoya el desarrollo de FEGI Apps' : 'Support FEGI Apps development'}</h3>
+            <h3 style={{ marginTop: 0 }}>{lang === 'es' ? 'Apoya el desarrollo de FEGI Apps' : 'Support FEGI Apps development'}</h3>
             <p style={{ fontSize: '14px', color: '#94a3b8' }}>
               {lang === 'es' ? 'Si este simulador te ayudó, elige o ingresa un monto:' : 'If this simulator helped you, choose or enter an amount:'}
             </p>
@@ -144,7 +195,7 @@ export default function App() {
                 key={idx}
                 onClick={() => setSelectedTipOption(idx)}
                 style={{ 
-                  display: 'flex', justifyContent: 'space-between', width: '100%', padding: '10px', margin: '8px 0', 
+                  display: 'flex', justifyContent: 'space-between', width: '100%', padding: '12px', margin: '8px 0', 
                   background: selectedTipOption === idx ? '#f59e0b' : '#334155', 
                   color: selectedTipOption === idx ? '#000' : '#fff', 
                   border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' 
@@ -157,7 +208,7 @@ export default function App() {
 
             <button 
               onClick={() => setShowTipModal(false)}
-              style={{ width: '100%', marginTop: '10px', padding: '10px', background: '#64748b', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+              style={{ width: '100%', marginTop: '10px', padding: '10px', background: '#64748b', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
             >
               {lang === 'es' ? 'Cerrar' : 'Close'}
             </button>
