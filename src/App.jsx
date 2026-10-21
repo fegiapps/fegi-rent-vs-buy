@@ -11,13 +11,20 @@ export default function App() {
   const [customAmount, setCustomAmount] = useState(5.99);
   const [tipProcessed, setTipProcessed] = useState(false);
 
+  // Tasas de cambio de referencia actuales del mercado
+  const exchangeRates = {
+    USD: 1,
+    EUR: 0.89,
+    DOP: 61.41
+  };
+
   const tipOptions = [
-    { labelEs: '🍵 Taza de Té', labelEn: '🍵 Cup of Tea', amount: 1.99 },
-    { labelEs: '☕ Taza de Café', labelEn: '☕ Cup of Coffee', amount: 3.99 },
+    { labelEs: '🍵 Tasa de Té', labelEn: '🍵 Cup of Tea', amount: 1.99 },
+    { labelEs: '☕ Tasa de Café', labelEn: '☕ Cup of Coffee', amount: 3.99 },
     { labelEs: '✨ Dime tú (Personalizado)', labelEn: '✨ You name it (Custom)', amount: customAmount },
   ];
 
-  // Parámetros de Compra (Rangos ampliados para EE.UU. y Rep. Dom.)
+  // Parámetros de Compra
   const [homePrice, setHomePrice] = useState(350000);
   const [downPaymentPct, setDownPaymentPct] = useState(20);
   const [interestRate, setInterestRate] = useState(7.5);
@@ -26,11 +33,36 @@ export default function App() {
   const [maintenancePct, setMaintenancePct] = useState(1.0);
   const [closingCostsPct, setClosingCostsPct] = useState(3.5);
 
-  // Parámetros de Alquiler e Inversión (Límite superior ampliado hasta $50,000)
+  // Parámetros de Alquiler e Inversión
   const [monthlyRent, setMonthlyRent] = useState(2500);
   const [rentInflation, setRentInflation] = useState(4.0);
   const [investmentReturn, setInvestmentReturn] = useState(8.0);
   const [horizonYears, setHorizonYears] = useState(10);
+
+  // Rangos máximos dinámicos según la moneda activa
+  const limits = useMemo(() => {
+    if (currency === 'DOP') {
+      return { maxPrice: 3000000000, maxRent: 1000000, stepPrice: 1000000, stepRent: 5000 };
+    } else if (currency === 'EUR') {
+      return { maxPrice: 45000000, maxRent: 45000, stepPrice: 50000, stepRent: 500 };
+    } else {
+      return { maxPrice: 50000000, maxRent: 50000, stepPrice: 50000, stepRent: 500 };
+    }
+  }, [currency]);
+
+  // Conversión automática al alternar moneda
+  const handleCurrencyChange = (newCurrency) => {
+    if (newCurrency === currency) return;
+
+    const oldRate = exchangeRates[currency];
+    const newRate = exchangeRates[newCurrency];
+    const conversionFactor = newRate / oldRate;
+
+    setHomePrice(prev => Math.round(prev * conversionFactor));
+    setMonthlyRent(prev => Math.round(prev * conversionFactor));
+
+    setCurrency(newCurrency);
+  };
 
   const t = {
     es: {
@@ -185,7 +217,7 @@ export default function App() {
   ]);
 
   const fmt = (val) =>
-    new Intl.NumberFormat('en-US', {
+    new Intl.NumberFormat(lang === 'es' ? 'es-DO' : 'en-US', {
       style: 'currency',
       currency: currency,
       maximumFractionDigits: 0,
@@ -202,7 +234,7 @@ export default function App() {
       }}
     >
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-        {/* Header con el nuevo isotipo RB */}
+        {/* Header con el isotipo RB */}
         <header
           style={{
             display: 'flex',
@@ -244,7 +276,7 @@ export default function App() {
           <div style={{ display: 'flex', gap: '8px' }}>
             <select
               value={currency}
-              onChange={(e) => setCurrency(e.target.value)}
+              onChange={(e) => handleCurrencyChange(e.target.value)}
               style={{
                 background: '#1e293b',
                 color: '#fff',
@@ -254,8 +286,8 @@ export default function App() {
               }}
             >
               <option value="USD">USD ($)</option>
-              <option value="DOP">DOP (RD$)</option>
               <option value="EUR">EUR (€)</option>
+              <option value="DOP">DOP (RD$)</option>
             </select>
             <button
               onClick={() => setLang(lang === 'es' ? 'en' : 'es')}
@@ -381,9 +413,9 @@ export default function App() {
               label={t.homePrice}
               value={homePrice}
               setValue={setHomePrice}
-              min={50000}
-              max={5000000}
-              step={10000}
+              min={currency === 'DOP' ? 1000000 : 50000}
+              max={limits.maxPrice}
+              step={currency === 'DOP' ? 500000 : 10000}
               display={fmt(homePrice)}
             />
             <SliderControl
@@ -469,9 +501,9 @@ export default function App() {
               label={t.monthlyRent}
               value={monthlyRent}
               setValue={setMonthlyRent}
-              min={500}
-              max={50000}
-              step={250}
+              min={currency === 'DOP' ? 10000 : 500}
+              max={limits.maxRent}
+              step={currency === 'DOP' ? 5000 : 250}
               display={fmt(monthlyRent)}
             />
             <SliderControl
@@ -591,7 +623,6 @@ export default function App() {
                     ))}
                   </div>
 
-                  {/* Input personalizado si selecciona la opción 3 (Dime tú) */}
                   {selectedTipOption === 2 && (
                     <div style={{ marginBottom: '16px', textAlign: 'left' }}>
                       <label style={{ fontSize: '12px', color: '#cbd5e1', display: 'block', marginBottom: '4px' }}>
