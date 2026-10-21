@@ -11,8 +11,9 @@ export default function App() {
   const [customAmount, setCustomAmount] = useState(5.99);
   const [tipProcessed, setTipProcessed] = useState(false);
 
-  // Tasas de cambio por defecto editables manualmente
+  // Tasas de cambio base editables manualmente por el usuario
   const [exchangeRates, setExchangeRates] = useState({
+    USD: 1,
     EUR: 0.89,
     DOP: 61.41
   });
@@ -38,7 +39,7 @@ export default function App() {
   const [investmentReturn, setInvestmentReturn] = useState(8.0);
   const [horizonYears, setHorizonYears] = useState(10);
 
-  // Rangos máximos y mínimos dinámicos independientes por divisa
+  // Rangos máximos dinámicos independientes por divisa
   const limits = useMemo(() => {
     if (currency === 'DOP') {
       return { 
@@ -63,9 +64,8 @@ export default function App() {
   const handleCurrencyChange = (newCurrency) => {
     if (newCurrency === currency) return;
 
-    const getRate = (cur) => cur === 'USD' ? 1 : exchangeRates[cur];
-    const oldRate = getRate(currency);
-    const newRate = getRate(newCurrency);
+    const oldRate = exchangeRates[currency];
+    const newRate = exchangeRates[newCurrency];
     const conversionFactor = newRate / oldRate;
 
     setHomePrice(prev => Math.round(prev * conversionFactor));
@@ -74,18 +74,18 @@ export default function App() {
     setCurrency(newCurrency);
   };
 
-  // Función para actualizar la tasa manualmente y recalcular valores de inmediato
+  // Función para actualizar la tasa manualmente desde el input y recalcular todo
   const handleRateChange = (newRateValue) => {
     const val = parseFloat(newRateValue) || 1;
     const oldRate = exchangeRates[currency];
     
-    // Actualizamos la tasa en el estado
     setExchangeRates(prev => ({ ...prev, [currency]: val }));
 
-    // Recalcular los montos actuales en base a la nueva tasa introducida
-    const conversionFactor = val / oldRate;
-    setHomePrice(prev => Math.round(prev * conversionFactor));
-    setMonthlyRent(prev => Math.round(prev * conversionFactor));
+    if (currency !== 'USD') {
+      const conversionFactor = val / oldRate;
+      setHomePrice(prev => Math.round(prev * conversionFactor));
+      setMonthlyRent(prev => Math.round(prev * conversionFactor));
+    }
   };
 
   const t = {
@@ -260,7 +260,7 @@ export default function App() {
       }}
     >
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-        {/* Header con el isotipo RB y controles */}
+        {/* Header con Isotipo RB, Selector de Moneda, Idioma y Campo Manual de Tasa */}
         <header
           style={{
             display: 'flex',
@@ -302,16 +302,16 @@ export default function App() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            {/* Campo manual de tasa de cambio (visible si no es USD) */}
+            {/* Campo manual de tasa de cambio (visible cuando se selecciona EUR o DOP) */}
             {currency !== 'USD' && (
-              <div style={{ display: 'flex', alignItems: 'center', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px', padding: '4px 8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px', padding: '4px 10px' }}>
                 <span style={{ fontSize: '11px', color: '#94a3b8', marginRight: '6px' }}>{currency} {t.rateLabel}</span>
                 <input 
                   type="number"
                   step="0.01"
                   value={exchangeRates[currency]}
                   onChange={(e) => handleRateChange(e.target.value)}
-                  style={{ width: '65px', background: '#0f172a', color: '#38bdf8', border: '1px solid #475569', borderRadius: '4px', padding: '2px 4px', fontSize: '12px', fontWeight: 'bold' }}
+                  style={{ width: '70px', background: '#0f172a', color: '#38bdf8', border: '1px solid #475569', borderRadius: '4px', padding: '4px 6px', fontSize: '12px', fontWeight: 'bold' }}
                 />
               </div>
             )}
@@ -324,7 +324,8 @@ export default function App() {
                 color: '#fff',
                 border: '1px solid #334155',
                 borderRadius: '8px',
-                padding: '6px 10px',
+                padding: '8px 12px',
+                fontWeight: 'bold',
               }}
             >
               <option value="USD">USD ($)</option>
@@ -338,8 +339,9 @@ export default function App() {
                 color: '#fff',
                 border: '1px solid #334155',
                 borderRadius: '8px',
-                padding: '6px 12px',
+                padding: '8px 12px',
                 cursor: 'pointer',
+                fontWeight: 'bold',
               }}
             >
               {lang === 'es' ? 'EN' : 'ES'}
@@ -422,7 +424,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* Controles Interactivos */}
+        {/* Controles Interactivos con Rangos Dinámicos */}
         <div
           style={{
             display: 'grid',
@@ -751,12 +753,3 @@ function SliderControl({ label, value, setValue, min, max, step, display }) {
         step={step}
         value={value}
         onChange={(e) => setValue(parseFloat(e.target.value))}
-        style={{
-          width: '100%',
-          accentColor: '#38bdf8',
-          cursor: 'pointer',
-        }}
-      />
-    </div>
-  );
-}
